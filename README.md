@@ -2,6 +2,6 @@
 
 Follow instructions above to build MESH and jars
 
-Execute runPageRank.sh (chmod +x possibly)
+Execute runPageRank.sh (chmod +x possibly). Change the directories in the file to match your uniqname and location
 
 Output stored in log.txt
