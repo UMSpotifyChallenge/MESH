@@ -57,8 +57,10 @@ object BipartiteHyperGraph {
         Edge(srcId = vid, dstId = hid + shift, attr = ())
     }
     val graph = Graph(vertices, edges)
-
+    val num_edges = graph.numEdges
+    val num_vertices = graph.numVertices
     logger.log("Graph returned")
+    logger.log(s"Edges: $num_edges | Vertices: $num_vertices")
 
     val partitionedGraph = if (partition.isDefined) {
       val (partitionStrategy, (numPartitions, thresold)) = partition.get

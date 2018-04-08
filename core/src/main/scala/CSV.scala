@@ -32,7 +32,7 @@ object CSV {
 
   def hypergraph(filename: String,
                  fileArg: Int = 1,
-                 partition: Option[(PartitionStrategy, (Int, Int))])
+                 partition: Option[(PartitionStrategy, (Int, Int))] = None)
                 (implicit sc: SparkContext): HyperGraph[VAttr, HAttr] = {
     val logger = Logger("CSV.hypergraph")
 
@@ -45,19 +45,9 @@ object CSV {
     val hvAttrs: VAttrs = structure.values.distinct.map(_ -> ())
     logger.log("heAttrs and hvAttrs defined")
 
-    val hg = BipartiteHyperGraph(structure, hvAttrs, heAttrs, partition)
+    val hg = BipartiteHyperGraph(structure, hvAttrs, heAttrs)
     logger.log("hg defined")
 
-    val subHg = if (fileArg < 1) {
-      val minHyperEdgeCardinality = -fileArg
-      hg.subHyperGraph(hePred = _.attr._1 >= minHyperEdgeCardinality)
-    } else if (fileArg > 0){
-      val maxHyperEdgeCardinality = fileArg
-      hg.subHyperGraph(hePred = _.attr._1 <= maxHyperEdgeCardinality)
-    } else {
-      hg
-    }
-    logger.log("subHg defined")
-    subHg
+    hg
   }
 }

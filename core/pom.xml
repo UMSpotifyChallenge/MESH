@@ -48,6 +48,7 @@
         <dependency>
             <groupId>spark-graphx-mesh</groupId>
             <artifactId>spark-graphx-mesh</artifactId>
+            <version>1.6.0</version>
         </dependency>
     </dependencies>
 
