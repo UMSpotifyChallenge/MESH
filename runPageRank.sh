@@ -10,3 +10,6 @@ spark-submit --class umn.dcsg.examples.PageRankRunner \
 --executor-cores 4 \
 /home/siddvenk/UMSpotifyChallenge/MESH/examples/target/examples-1.0-SNAPSHOT-jar-with-dependencies.jar \
 "/user/siddvenk/MESH/track_hypergraph_all_features.csv" 0 50 &> output.txt
+
+cat output.txt | grep "LOGGER" > log.txt
+rm output.txt
