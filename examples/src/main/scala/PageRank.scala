@@ -84,11 +84,15 @@ object PageRank {
 
   def prGraph[VD: ClassTag](g: Graph[VD, Double],
                             maxIters: Int,
+                            startingIds: List[Int],
                             alpha: Double = 0.15): Graph[(VD, Double), Double] = {
 
     val logger = Logger("PageRank.prGraph")
 
-    var augmentedG: Graph[(VD, Double), Double] = augment(g, 1.0)
+    var augmentedG: Graph[(VD, Double), Double] =  g.mapVertices((vid, vd) =>
+      if (startingIds contains vid) vd -> 1.0
+      else vd -> 0.0
+    )
 
     var iteration = 0
     var prevG = augmentedG
@@ -134,10 +138,14 @@ object PageRank {
 
   def pr[HVD](hg: HyperGraph[HVD, (Int, Int)],
               maxIters: Int,
+              startingIds: List[Int],
               alpha: Double = 0.15): HyperGraph[(HVD, Double), ((Int, Int), Double)] = {
 
     // Augment vertices and hyperedges with their rank
-    val augmentedHg = augment(hg, 1.0, 0.0)
+    val augmentedHg = hg.mapHyperVertices(hv =>
+      if (startingIds contains hv.id) hv.attr -> 1.0
+      else hv.attr -> 0.0
+    ).mapHyperEdges(he => he.attr -> 0.0)
 
     type ToV = (Double, Double)
     type ToE = Double

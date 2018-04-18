@@ -21,8 +21,8 @@ import dcsg.hg.HyperGraph._
 object RandomWalks {
 
   def pr[HVD](hg: HyperGraph[HVD, (Int, Int)],
-              maxIters: Int, startingIds: List[Int], restartPr: Double,
-              epsilon: Double): HyperGraph[(HVD, Double), ((Int, Int), Double)] = {
+              maxIters: Int, startingIds: List[Int], restartPr: Double=0.15,
+              epsilon: Double=0.001): HyperGraph[(HVD, Double), ((Int, Int), Double)] = {
 
     val augmentedHg = hg.mapHyperVertices(hv =>
       if (startingIds contains hv.id) hv.attr -> 1.0

@@ -65,7 +65,7 @@ object BipartiteHyperGraph {
     val partitionedGraph = if (partition.isDefined) {
       val (partitionStrategy, (numPartitions, thresold)) = partition.get
       logger.log(s"partition strategy: $partitionStrategy")
-      graph.partitionBy(partitionStrategy, numPartitions, thresold)
+      graph.partitionBy(partitionStrategy, numPartitions)
     }
     else {
       graph

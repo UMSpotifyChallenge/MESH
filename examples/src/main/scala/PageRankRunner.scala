@@ -14,6 +14,7 @@
 
 package umn.dcsg.examples
 
+import scala.io.Source
 import dcsg.hg.Util._
 import dcsg.hg.{CSV, HyperGraph}
 import org.apache.spark.graphx.PartitionStrategy._
@@ -23,30 +24,48 @@ object PageRankRunner {
 
     val logger = Logger("PageRankRunner")
 
-    if (args.size != 3) {
+    if (args.size != 7) {
       usage()
       println(args(0))
       System.exit(1)
     }
 
     val inputfile = args(0)
-    val fileArg = args(1).toInt
+    val startingIdFile = args(1)
+    val fileArg = args(2).toInt
 
-    val numIters = args(2).toInt
+    val numIters = args(3).toInt
 
-    val algorithm: HyperGraph[_, (Int, Int)] => Unit = PageRank.pr(_, numIters)
+    var partitionStrategy = args(4) match {
+      case "1D-src" => EdgePartition1D
+      case "1D-dst" => EdgePartition1DByDst
+      case "2D" => EdgePartition2D
+      case "GreedySrc" => GreedySrc
+      case "GreedyDst" => GreedyDst
+      case "HybridSrc" => HybridSrc
+      case "HybridDst" => HybridDst
+    }
+
+    val numPartitions = args(5).toInt
+    val threshold = args(6).toInt
+    val partition = Some(partitionStrategy -> (numPartitions, threshold))
 
     implicit val sc = makeSparkContext("PageRankRunner")
     try {
       val start1 = System.currentTimeMillis()
       val hg = CSV.hypergraph(inputfile, fileArg)
+      val graph = hg.toGraph { case (c, w) => w.toDouble / c } (_ + _)
       val end1 = System.currentTimeMillis()
       val partitionTime = end1 - start1
-      logger.log("Start Page Rank")
       logger.log(s"Time taken for partitioning: $partitionTime ms")
+      val playlistTracks = Source.fromFile(startingIdFile).getLines.toList.map((s: String) => s.toInt)
+      val numIds: Int = playlistTracks.size / 3
+      val (startingIds, remainder) = playlistTracks.splitAt(2*numIds)
+      logger.log(s"Starting Ids: $startingIds. Remainder Ids: $remainder")
+      logger.log("Start Page Rank")
 
       val start2 = System.currentTimeMillis()
-      algorithm(hg)
+      val prhg = PageRank.prGraph(graph, numIters, startingIds)
       val end2 = System.currentTimeMillis()
       val executionTime = end2 - start2
       logger.log(s"Time taken for Page Rank: $executionTime ms")
@@ -58,6 +77,6 @@ object PageRankRunner {
   }
 
   def usage(): Unit = {
-    println("usage: PageRankRuner inputfile fileArg numIters")
+    println("usage: PageRankRuner inputfile startingIdFile fileArg numIters partitionStrategy numPartitions threshold")
   }
 }
